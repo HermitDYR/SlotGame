@@ -3,6 +3,7 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hawaiian_game_slot/slot_game.dart';
 import 'package:hawaiian_game_slot/slot_game/slot_game_control_menu/slot_game_bgm_button.dart';
 import 'package:hawaiian_game_slot/slot_game/slot_game_control_menu/slot_game_link_tips_dialog.dart';
@@ -44,11 +45,15 @@ class SlotGameControlMenu extends PositionComponent with HasGameRef<SlotGame> {
 
   /// 文字風格
   TextPaint textPaint = TextPaint(
-    style: const TextStyle(
+    style: GoogleFonts.abel(
       fontSize: 30.0,
-      fontFamily: 'Awesome Font',
       color: Colors.white,
     ),
+    // style: const TextStyle(
+    //   fontSize: 30.0,
+    //   fontFamily: 'Awesome Font',
+    //   color: Colors.white,
+    // ),
   );
 
   /// 老虎機遊戲控制選單
@@ -265,11 +270,15 @@ class SlotGameControlMenu extends PositionComponent with HasGameRef<SlotGame> {
       winDialog!.add(TextComponent(
         text: "$win",
         textRenderer: TextPaint(
-          style: const TextStyle(
+          style: GoogleFonts.abel(
             fontSize: 45.0,
-            fontFamily: 'Awesome Font',
             color: Colors.white,
           ),
+          // style: const TextStyle(
+          //   fontSize: 45.0,
+          //   fontFamily: 'Awesome Font',
+          //   color: Colors.white,
+          // ),
         ),
         size: Vector2(winDialog!.size.x / 2, winDialog!.size.y / 2),
         position: Vector2(winDialog!.size.x / 2, winDialog!.size.y * 0.65),

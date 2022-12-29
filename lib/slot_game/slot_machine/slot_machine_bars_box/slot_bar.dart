@@ -68,11 +68,11 @@ class SlotBar extends PositionComponent with HasGameRef<SlotGame> {
     // 設置假的老虎機滾輪物件箱動畫精靈
     await _setupFakeSlotBarBoxSpriteAnimation();
 
-    // 設置老虎機滾輪上方反應箱
-    _setupSlotBarTopReplyBox();
+    // // 設置老虎機滾輪上方反應箱
+    // _setupSlotBarTopReplyBox();
 
-    // 設置老虎機滾輪下方反應箱
-    _setupSlotBarBottomReplyBox();
+    // // 設置老虎機滾輪下方反應箱
+    // _setupSlotBarBottomReplyBox();
 
     // 將老虎機滾輪物件箱子新增到內部錨點上
     addSlotBarBoxAtInside();
@@ -104,27 +104,27 @@ class SlotBar extends PositionComponent with HasGameRef<SlotGame> {
     }
   }
 
-  /// 設置老虎機滾輪上方反應箱
-  void _setupSlotBarTopReplyBox() {
-    const height = 10.0;
-    add(SlotBarTopReplyBox(
-      index: index,
-      position: Vector2(size.x / 2, 0 - height),
-      size: Vector2(size.x, height),
-    ));
-  }
+  // /// 設置老虎機滾輪上方反應箱
+  // void _setupSlotBarTopReplyBox() {
+  //   const height = 10.0;
+  //   add(SlotBarTopReplyBox(
+  //     index: index,
+  //     position: Vector2(size.x / 2, 0 - height),
+  //     size: Vector2(size.x, height),
+  //   ));
+  // }
 
-  /// 設置老虎機滾輪下方反應箱
-  void _setupSlotBarBottomReplyBox() {
-    // TODO: 如果SlotBarBox向下更新速度過快，可能會導致與SlotBarBottomReplayBox的碰撞事件失效
-    // - 解法，當SlotBarBox向下更新速度越快，則SlotBarBottomReplayBox須往Y軸下方多偏移一些位置，讓碰撞監聽正常
-    const height = 10.0;
-    add(SlotBarBottomReplyBox(
-      index: index,
-      position: Vector2(size.x / 2, size.y + height * 5.0),
-      size: Vector2(size.x, height),
-    ));
-  }
+  // /// 設置老虎機滾輪下方反應箱
+  // void _setupSlotBarBottomReplyBox() {
+  //   // TODO: 如果SlotBarBox向下更新速度過快，可能會導致與SlotBarBottomReplayBox的碰撞事件失效
+  //   // - 解法，當SlotBarBox向下更新速度越快，則SlotBarBottomReplayBox須往Y軸下方多偏移一些位置，讓碰撞監聽正常
+  //   const height = 10.0;
+  //   add(SlotBarBottomReplyBox(
+  //     index: index,
+  //     position: Vector2(size.x / 2, size.y + height * 5.0),
+  //     size: Vector2(size.x, height),
+  //   ));
+  // }
 
   /// 將老虎機滾輪物件箱子新增到上方外部錨點上
   void addSlotBarBoxAtTopOutside() {
@@ -136,12 +136,13 @@ class SlotBar extends PositionComponent with HasGameRef<SlotGame> {
       position: _topOutsideAnchorPoint,
       size: size,
       stayPosition: _insideAnchorPoint,
+      removePosition: _bottomOutsideAnchorPoint,
       speed: gameRef.slotMachine.slotBarBoxMoveSpeed.toDouble(),
       isStay: (_itemIdList != null),
       onStay: onStayFromSlotBarBox,
       itemIdList: _itemIdList,
       itemLotteryIndexList: _itemLotteryIndexList,
-      onCollisionWithBottomReplyBox: _onCollisionWithBottomReplyBoxFromSlotBarBox,
+      // onCollisionWithBottomReplyBox: _onCollisionWithBottomReplyBoxFromSlotBarBox,
     );
     add(targetSlotBarBox!);
     slotBarBoxAddedCount++;
@@ -160,12 +161,13 @@ class SlotBar extends PositionComponent with HasGameRef<SlotGame> {
       position: _insideAnchorPoint,
       size: size,
       stayPosition: _insideAnchorPoint,
+      removePosition: _bottomOutsideAnchorPoint,
       speed: gameRef.slotMachine.slotBarBoxMoveSpeed.toDouble(),
       isStay: true,
       onStay: onStayFromSlotBarBox,
       itemIdList: lottery[index],
       itemLotteryIndexList: _itemLotteryIndexList,
-      onCollisionWithBottomReplyBox: _onCollisionWithBottomReplyBoxFromSlotBarBox,
+      // onCollisionWithBottomReplyBox: _onCollisionWithBottomReplyBoxFromSlotBarBox,
     );
     add(targetSlotBarBox!);
     slotBarBoxAddedCount++;
@@ -173,11 +175,11 @@ class SlotBar extends PositionComponent with HasGameRef<SlotGame> {
     _itemLotteryIndexList = null;
   }
 
-  /// 老虎機滾輪箱子與老虎機下方反應箱進入碰撞
-  void _onCollisionWithBottomReplyBoxFromSlotBarBox(int slotBarBoxIndex) {
-    // TODO: 將老虎機滾輪物件箱子新增到上方外部錨點上
-    // addSlotBarBoxAtTopOutside();
-  }
+  // /// 老虎機滾輪箱子與老虎機下方反應箱進入碰撞
+  // void _onCollisionWithBottomReplyBoxFromSlotBarBox(int slotBarBoxIndex) {
+  //   // TODO: 將老虎機滾輪物件箱子新增到上方外部錨點上
+  //   // addSlotBarBoxAtTopOutside();
+  // }
 
   /// 開始滾動
   void spin() {
@@ -185,7 +187,7 @@ class SlotBar extends PositionComponent with HasGameRef<SlotGame> {
     // - 解法，當SlotBarBox向下更新速度越快，則SlotBarBottomReplayBox須往Y軸下方多偏移一些位置，讓碰撞監聽正常
     if (targetSlotBarBox != null && targetSlotBarBox!.isStay) {
       targetSlotBarBox!.isStay = false;
-      targetSlotBarBox!.isCollisionWithBottomReplyBox = false;
+      // targetSlotBarBox!.isCollisionWithBottomReplyBox = false;
       targetSlotBarBox!.isMove = true;
     }
   }

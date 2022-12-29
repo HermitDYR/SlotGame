@@ -7,7 +7,7 @@ import 'package:hawaiian_game_slot/slot_game.dart';
 import 'package:hawaiian_game_slot/slot_game/slot_machine/slot_machine_bars_box/slot_bar/slot_bar_bottom_reply_box.dart';
 import 'package:hawaiian_game_slot/slot_game/slot_machine/slot_machine_bars_box/slot_bar/slot_bar_box/slot_item.dart';
 
-class SlotBarBox extends PositionComponent with CollisionCallbacks, HasGameRef<SlotGame> {
+class SlotBarBox extends PositionComponent with /*CollisionCallbacks,*/ HasGameRef<SlotGame> {
   /// 索引
   int index;
 
@@ -26,6 +26,9 @@ class SlotBarBox extends PositionComponent with CollisionCallbacks, HasGameRef<S
   /// 停留位置
   Vector2? stayPosition;
 
+  /// 停留位置
+  Vector2? removePosition;
+
   /// 是否停留
   bool isStay;
 
@@ -36,7 +39,7 @@ class SlotBarBox extends PositionComponent with CollisionCallbacks, HasGameRef<S
   bool isMove = true;
 
   /// 是否發生碰撞
-  bool isCollisionWithBottomReplyBox = false;
+  // bool isCollisionWithBottomReplyBox = false;
 
   /// 進入碰撞
   Function(int index)? onCollisionWithBottomReplyBox;
@@ -45,7 +48,7 @@ class SlotBarBox extends PositionComponent with CollisionCallbacks, HasGameRef<S
   final _isDebug = false;
 
   /// 碰撞檢測
-  late ShapeHitbox _hitbox;
+  // late ShapeHitbox _hitbox;
 
   /// 預設速度
   ///
@@ -63,12 +66,13 @@ class SlotBarBox extends PositionComponent with CollisionCallbacks, HasGameRef<S
     required Vector2? position,
     required Vector2? size,
     required this.stayPosition,
+    required this.removePosition,
     required this.speed,
     this.isStay = false,
     this.onStay,
     this.itemIdList,
     this.itemLotteryIndexList,
-    this.onCollisionWithBottomReplyBox,
+    // this.onCollisionWithBottomReplyBox,
   }) : super(position: position, size: size, anchor: Anchor.center);
 
   @override
@@ -78,8 +82,8 @@ class SlotBarBox extends PositionComponent with CollisionCallbacks, HasGameRef<S
 
     _generatePosition = position;
 
-    // 設置碰撞檢測
-    _setupHitBox();
+    // // 設置碰撞檢測
+    // _setupHitBox();
 
     // 設定錨點陣列
     _setupAnchorPoints();
@@ -117,44 +121,49 @@ class SlotBarBox extends PositionComponent with CollisionCallbacks, HasGameRef<S
       var y = position.y + (dt * size.y * speed);
       position = Vector2(x, y);
     }
-  }
 
-  @override
-  void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
-    super.onCollisionStart(intersectionPoints, other);
-    // 與老虎機滾輪下方反應箱碰撞開始後對外通知
-    if (other is SlotBarBottomReplyBox) {
-      // print("onCollisionStart~~~ SlotBarBottomReplyBox");
-      // 透過isCollisionWithBottomReplyBox當旗標，過濾碰撞開始onCollisionStart()頻繁的通知
-      if (!isCollisionWithBottomReplyBox) {
-        isCollisionWithBottomReplyBox = true;
-        // print("isCollisionWithBottomReplyBox: $isCollisionWithBottomReplyBox, isStay: $isStay");
-        // 如果停留狀態不啟用
-        if (!isStay) {
-          // 對外通知進入碰撞
-          if (onCollisionWithBottomReplyBox != null) {
-            onCollisionWithBottomReplyBox!(index);
-          }
-        }
-      }
-    }
-  }
-
-  @override
-  void onCollisionEnd(PositionComponent other) {
-    super.onCollisionEnd(other);
-
-    // 與老虎機滾輪下方反應箱碰撞結束後將自己移除
-    if (other is SlotBarBottomReplyBox) {
+    if (position.y >= removePosition!.y) {
+      // 刪除
       removeFromParent();
     }
   }
 
-  /// 設置碰撞檢測
-  void _setupHitBox() {
-    _hitbox = RectangleHitbox();
-    add(_hitbox);
-  }
+  // @override
+  // void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
+  //   super.onCollisionStart(intersectionPoints, other);
+  //   // 與老虎機滾輪下方反應箱碰撞開始後對外通知
+  //   if (other is SlotBarBottomReplyBox) {
+  //     // print("onCollisionStart~~~ SlotBarBottomReplyBox");
+  //     // 透過isCollisionWithBottomReplyBox當旗標，過濾碰撞開始onCollisionStart()頻繁的通知
+  //     if (!isCollisionWithBottomReplyBox) {
+  //       isCollisionWithBottomReplyBox = true;
+  //       // print("isCollisionWithBottomReplyBox: $isCollisionWithBottomReplyBox, isStay: $isStay");
+  //       // 如果停留狀態不啟用
+  //       if (!isStay) {
+  //         // 對外通知進入碰撞
+  //         if (onCollisionWithBottomReplyBox != null) {
+  //           onCollisionWithBottomReplyBox!(index);
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+
+  // @override
+  // void onCollisionEnd(PositionComponent other) {
+  //   super.onCollisionEnd(other);
+  //
+  //   // 與老虎機滾輪下方反應箱碰撞結束後將自己移除
+  //   if (other is SlotBarBottomReplyBox) {
+  //     removeFromParent();
+  //   }
+  // }
+
+  // /// 設置碰撞檢測
+  // void _setupHitBox() {
+  //   _hitbox = RectangleHitbox();
+  //   add(_hitbox);
+  // }
 
   /// 測試錨點標示物件
   RectangleComponent _getDebugAnchorItem({

@@ -326,7 +326,7 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
       // TODO: 彈窗點擊導入外部網頁
       if (gameRef.slotGameControlMenu.linkTipsDialog == null) {
         // 進行外連提示彈窗
-        // gameRef.slotGameControlMenu.showLinkTipsDialog(text: "繼續遊戲?", linkUrl: "gameRef.gameLinkUrl");
+        // gameRef.slotGameControlMenu.showLinkTipsDialog(text: "繼續遊戲?", linkUrl: gameRef.gameLinkUrl);
         gameRef.slotGameControlMenu.showLinkTipsDialog(text: "Continue Play?", linkUrl: gameRef.gameLinkUrl);
       }
     }

@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hawaiian_game_slot/slot_game.dart';
 import 'package:hawaiian_game_slot/slot_game/slot_game_control_menu/slot_game_dialog_button.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -48,12 +49,15 @@ class SlotGameLinkTipsDialog extends SpriteComponent with HasGameRef<SlotGame> {
     _textComponent = TextComponent(
       text: text ?? "?",
       textRenderer: TextPaint(
-        // style: GoogleFonts.getFont('Lato'),
-        style: const TextStyle(
-          fontSize: 30.0,
-          fontFamily: 'Awesome Font',
-          color: Colors.white,
+        style: GoogleFonts.abel(
+            fontSize: 30.0,
+            color: Colors.white,
         ),
+        // style: const TextStyle(
+        //   fontSize: 30.0,
+        //   fontFamily: 'Awesome Font',
+        //   color: Colors.white,
+        // ),
       ),
       size: Vector2(size.x * 0.8, size.y * 0.8),
       position: Vector2(size.x / 2, size.y * 0.25),
@@ -77,11 +81,15 @@ class SlotGameLinkTipsDialog extends SpriteComponent with HasGameRef<SlotGame> {
     leftDialogButton!.add(TextComponent(
       text: "YES",
       textRenderer: TextPaint(
-        style: const TextStyle(
+        style: GoogleFonts.abel(
           fontSize: 30.0,
-          fontFamily: 'Awesome Font',
           color: Colors.white,
         ),
+        // style: const TextStyle(
+        //   fontSize: 30.0,
+        //   fontFamily: 'Awesome Font',
+        //   color: Colors.white,
+        // ),
       ),
       size: Vector2(spriteSize.x, spriteSize.y),
       position: Vector2(spriteSize.x / 2, spriteSize.y / 2),
@@ -105,11 +113,15 @@ class SlotGameLinkTipsDialog extends SpriteComponent with HasGameRef<SlotGame> {
     rightDialogButton!.add(TextComponent(
       text: "NO",
       textRenderer: TextPaint(
-        style: const TextStyle(
+        style: GoogleFonts.abel(
           fontSize: 30.0,
-          fontFamily: 'Awesome Font',
           color: Colors.white,
         ),
+        // style: const TextStyle(
+        //   fontSize: 30.0,
+        //   fontFamily: 'Awesome Font',
+        //   color: Colors.white,
+        // ),
       ),
       size: Vector2(spriteSize.x, spriteSize.y),
       position: Vector2(spriteSize.x / 2, spriteSize.y / 2),
