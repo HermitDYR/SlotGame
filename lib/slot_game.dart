@@ -136,7 +136,7 @@ class SlotGame extends FlameGame with HasTappables, HasCollisionDetection {
           ..color = Colors.white
           ..style = PaintingStyle.fill));
 
-    final sprite = await Sprite.load('game/game_loading.jpg');
+    final sprite = await Sprite.load('game/game_background.jpg');
     add(SpriteComponent(sprite: sprite, size: cameraFixedViewPort));
     return;
   }
@@ -168,7 +168,7 @@ class SlotGame extends FlameGame with HasTappables, HasCollisionDetection {
 
   /// 設置老虎機遮罩
   Future<void> _setupMask() async {
-    final sprite = await Sprite.load('game/game_loading_mask.png');
+    final sprite = await Sprite.load('game/game_background_mask.png');
     var width = cameraFixedViewPort.x;
     var height = cameraFixedViewPort.y;
     var x = size.x / 2;
