@@ -13,6 +13,12 @@ class SlotGameControlMenu extends PositionComponent with HasGameRef<SlotGame> {
   /// 測試模式
   final _isDebug = false;
 
+  /// 老虎機目前的時間計數
+  double currentDuration = 0.0;
+
+  /// 老虎機Spin按鈕解鎖時間點
+  double slotGameSpinUnlockTimePoint = 5.0;
+
   /// 老虎機背景音樂按鈕
   SlotGameBgmButton? slotGameBgmButton;
 
@@ -73,6 +79,22 @@ class SlotGameControlMenu extends PositionComponent with HasGameRef<SlotGame> {
     return super.onLoad();
   }
 
+
+  @override
+  void update(double dt) {
+    // TODO: implement update
+    if (gameRef.paused == false) {
+      currentDuration += dt;
+    }
+
+    if (slotGameSpinButton != null && currentDuration > slotGameSpinUnlockTimePoint && slotGameSpinButton!.isLock) {
+      // 按鈕解除鎖定
+      slotGameSpinButton!.setIsLock(false);
+    }
+
+    super.update(dt);
+  }
+
   /// 下方控制欄位
   Future<void> _setupBottomBar() async {
     bottomBarSize = Vector2(size.x, size.y * 0.1);
@@ -120,13 +142,16 @@ class SlotGameControlMenu extends PositionComponent with HasGameRef<SlotGame> {
   }
 
   /// 老虎機背景音樂按鈕點擊事件
-  _onTapBgmButton(bool isSpin) {
-    // print("_onTapBgmButton");
-    if (gameRef.bgmAudioPlayer != null) {
+  _onTapBgmButton(bool isOpen) {
+    print("_onTapBgmButton: $isOpen");
+    if (gameRef.bgmAudioPlayer == null) return;
+    if (isOpen) {
       if (gameRef.bgmAudioPlayer!.state == PlayerState.playing) {
         gameRef.bgmAudioPlayer!.pause();
-      } else if (gameRef.bgmAudioPlayer!.state == PlayerState.paused) {
-        gameRef.bgmAudioPlayer!.resume();
+      }
+    } else {
+      if (gameRef.bgmAudioPlayer!.state == PlayerState.completed || gameRef.bgmAudioPlayer!.state == PlayerState.stopped || gameRef.bgmAudioPlayer!.state == PlayerState.paused) {
+        gameRef.bgmAudioPlayer!.play(AssetSource('audio/bgm.mp3'));
       }
     }
   }
@@ -146,9 +171,9 @@ class SlotGameControlMenu extends PositionComponent with HasGameRef<SlotGame> {
     );
     component.add(slotGameSpinButton!);
 
-    Future.delayed(Duration(milliseconds: gameRef.slotMachine.slotBarDelayMilliseconds * 10), () {
-      slotGameSpinButton!.setIsLock(false);
-    });
+    // Future.delayed(Duration(milliseconds: gameRef.slotMachine.slotBarDelayMilliseconds * 10), () {
+    //   slotGameSpinButton!.setIsLock(false);
+    // });
     return;
   }
 

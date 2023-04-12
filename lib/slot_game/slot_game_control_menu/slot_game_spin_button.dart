@@ -70,11 +70,11 @@ class SlotGameSpinButton extends SpriteComponent with Tappable, HasGameRef<SlotG
 
     // 按鈕鎖定
     setIsLock(true);
-    Future.delayed(const Duration(milliseconds: 3000), () {
-      // print("SlotGameSpinButton >> 解除鎖定!!!");
-      // 按鈕解除鎖定
-      setIsLock(false);
-    });
+    // Future.delayed(const Duration(milliseconds: 3000), () {
+    //   // print("SlotGameSpinButton >> 解除鎖定!!!");
+    //   // 按鈕解除鎖定
+    //   setIsLock(false);
+    // });
 
     return true;
   }

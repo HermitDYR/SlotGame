@@ -37,7 +37,7 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
   double slotBarStopDelay = 0.2;
 
   /// 老虎機各Bar的假滾動Box移除延遲秒數
-  double fakeSlotBarBoxRemoveDelay = 0.2;
+  double fakeSlotBarBoxRemoveDelay = 0.05;
 
   /// 老虎機各Bar的停止間隔時間點
   double nextStopTimePoint = 1.0;
@@ -260,6 +260,9 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
 
           if (i == barCount - 1) {
             state = SlotMachineState.idle;
+
+            // 按鈕解除鎖定
+            gameRef.slotGameControlMenu.slotGameSpinButton!.setIsLock(false);
           }
         }
       }
@@ -300,7 +303,7 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
     }
   }
 
-  /// 暫停背景應岳
+  /// 暫停背景音樂
   void audioPauseBGM() {
     if (gameRef.bgmAudioPlayer == null) return;
     if (gameRef.bgmAudioPlayer!.state == PlayerState.playing) {
