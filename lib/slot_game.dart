@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
@@ -72,6 +74,24 @@ class SlotGame extends FlameGame with HasTappables, HasCollisionDetection {
 
     // 設置老虎機遊戲控制選單
     _setupSlotGameControllerMenu();
+
+    window.onBlur.listen((Event event) {
+      paused = true;
+      print('Window lost focus... paused: $paused');
+      if (slotMachine != null) {
+        // 暫停背景音樂
+        slotMachine!.audioPauseBGM();
+      }
+    });
+
+    window.onFocus.listen((Event event) {
+      paused = false;
+      print('Window regained focus... paused: $paused');
+      if (slotMachine != null) {
+        // 播放背景音樂
+        slotMachine!.audioPlayBGM();
+      }
+    });
   }
 
   /// 設置遊戲(依據Web網址參數)

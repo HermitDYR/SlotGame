@@ -26,8 +26,11 @@ class SlotBarBox extends PositionComponent with /*CollisionCallbacks,*/ HasGameR
   /// 停留位置
   Vector2? stayPosition;
 
-  /// 停留位置
+  /// 移除位置
   Vector2? removePosition;
+
+  /// 是否進入移除位置
+  Function(int index)? onRemovePosition;
 
   /// 是否停留
   bool isStay;
@@ -42,7 +45,7 @@ class SlotBarBox extends PositionComponent with /*CollisionCallbacks,*/ HasGameR
   // bool isCollisionWithBottomReplyBox = false;
 
   /// 進入碰撞
-  Function(int index)? onCollisionWithBottomReplyBox;
+  // Function(int index)? onCollisionWithBottomReplyBox;
 
   /// 測試模式
   final _isDebug = false;
@@ -72,6 +75,7 @@ class SlotBarBox extends PositionComponent with /*CollisionCallbacks,*/ HasGameR
     this.onStay,
     this.itemIdList,
     this.itemLotteryIndexList,
+    this.onRemovePosition,
     // this.onCollisionWithBottomReplyBox,
   }) : super(position: position, size: size, anchor: Anchor.center);
 
@@ -125,6 +129,9 @@ class SlotBarBox extends PositionComponent with /*CollisionCallbacks,*/ HasGameR
     if (position.y >= removePosition!.y) {
       // 刪除
       removeFromParent();
+      if (onRemovePosition != null) {
+        onRemovePosition!(index);
+      }
     }
   }
 

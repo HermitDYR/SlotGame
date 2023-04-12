@@ -8,7 +8,32 @@ import 'package:hawaiian_game_slot/slot_game/slot_machine/slot_machine_bars_box/
 import 'package:hawaiian_game_slot/slot_game_config.dart';
 import 'package:spine_flutter/spine_flutter.dart';
 
+enum SlotMachineState {
+  /// 待機
+  idle,
+  /// 轉動
+  spin,
+  /// 停止
+  stop,
+}
+
 class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> {
+
+  SlotMachineState state = SlotMachineState.idle;
+
+  double currentDuration = 0.0;
+
+  double buttonTimePoint = 0.0;
+
+  double slotBarSpinDelay = 0.2;
+
+  double fakeSlotBarBoxAddDelay = 0.2;
+
+  double slotBarStopDelay = 0.2;
+
+  double fakeSlotBarBoxRemoveDelay = 0.2;
+
+  double nextStopTimePoint = 1.0;
 
   /// 符合RTP中獎機率的設計模式開獎盤面列表(包含中獎、未中獎)
   List<List<List<int>>> designModeAllLotteryList = [];
@@ -129,8 +154,97 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
   }
 
   @override
+  void update(double dt) {
+    // TODO: implement update
+    if (state == SlotMachineState.idle) {
+      if (currentDuration != 0.0) {
+        currentDuration = 0.0;
+        // print("currentDuration: $currentDuration");
+      } else {
+        return;
+      }
+    }
+
+    if (gameRef.paused == false) {
+      currentDuration += dt;
+    }
+
+    if (state == SlotMachineState.spin) {
+      _checkSlotBarToSpin(currentDuration);
+    }
+
+    if (state == SlotMachineState.stop) {
+      _checkSlotBarToStop(currentDuration);
+    }
+
+    super.update(dt);
+  }
+
+  @override
   bool onTapUp(TapUpInfo info) {
     return true;
+  }
+
+  void _checkSlotBarToSpin(double time) {
+
+    var list = [];
+    for (int i = 0; i < barCount; i++) {
+      list.add(buttonTimePoint + (i * slotBarSpinDelay));
+    }
+
+    if (slotMachineBarsBox != null) {
+      for (int i = 0; i < barCount; i++) {
+        SlotBar? slotBar = slotMachineBarsBox!.getSlotBar(index: i);
+        if (slotBar != null) {
+
+          if (time > list[i] && time < (slotBarSpinDelay + list[i])) {
+            // 寫法一，同步滾動
+            slotBar.spin();
+          }
+
+          if (time > (list[i] + fakeSlotBarBoxAddDelay) && time < (slotBarSpinDelay + list[i] + fakeSlotBarBoxAddDelay)) {
+            // 設置假的老虎機滾輪物件箱
+            slotBar.addFakeSlotBarBox();
+          }
+        }
+      }
+    }
+  }
+
+  void _checkSlotBarToStop(double time) {
+    // print("_checkSlotBarToStop currentDuration: $currentDuration, buttonTimePoint: $buttonTimePoint");
+    // 設置盤面內容
+    var list = [];
+    for (int i = 0; i < barCount; i++) {
+      list.add(buttonTimePoint + (i * slotBarStopDelay) + nextStopTimePoint);
+      SlotBar? slotBar = slotMachineBarsBox!.getSlotBar(index: i);
+      if (slotBar != null) {
+        // 設置老虎機滾輪物件內容編號陣列
+        slotBar.setupItemIdList(itemIdList: lottery[i]);
+        // 取得當前Bar有中獎的索引陣列
+        final lotteryIndexList = getLotteryIndexOnBar(lotteryNumbers: lottery, barIndex: i);
+        slotBar.setupItemLotteryIndexList(itemLotteryIndexList: lotteryIndexList);
+
+        if (time > list[i] && time < (slotBarStopDelay + list[i])) {
+          // print("SlotBar $i to Stop Do!!!");
+          // 將老虎機滾輪物件箱子新增到上方外部錨點上
+          slotBar.addSlotBarBoxAtTopOutside();
+        }
+
+        if (time > list[i] + fakeSlotBarBoxRemoveDelay && time < (slotBarStopDelay + list[i] + fakeSlotBarBoxRemoveDelay)) {
+          // print("SlotBar $i to Stop Do Delay!!!");
+          // 將假的老虎機滾輪物件箱移除
+          if (slotBar.fakeSlotBarBox != null) {
+            slotBar.fakeSlotBarBox!.removeFromParent();
+            slotBar.fakeSlotBarBox = null;
+          }
+
+          if (i == barCount - 1) {
+            state = SlotMachineState.idle;
+          }
+        }
+      }
+    }
   }
 
   /// 設置音效
@@ -160,10 +274,18 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
   }
 
   /// 播放背景音樂
-  void _audioPlayBGM() {
+  void audioPlayBGM() {
     if (gameRef.bgmAudioPlayer == null) return;
-    if (gameRef.bgmAudioPlayer!.state == PlayerState.completed || gameRef.bgmAudioPlayer!.state == PlayerState.stopped) {
+    if (gameRef.bgmAudioPlayer!.state == PlayerState.completed || gameRef.bgmAudioPlayer!.state == PlayerState.stopped || gameRef.bgmAudioPlayer!.state == PlayerState.paused) {
       gameRef.bgmAudioPlayer!.play(AssetSource('audio/bgm.mp3'));
+    }
+  }
+
+  /// 暫停背景應岳
+  void audioPauseBGM() {
+    if (gameRef.bgmAudioPlayer == null) return;
+    if (gameRef.bgmAudioPlayer!.state == PlayerState.playing) {
+      gameRef.bgmAudioPlayer!.pause();
     }
   }
 
@@ -233,7 +355,11 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
 
   /// 停止滾動
   void stop() async {
-    // print("SlotMachine >> stop!!!");
+    print("SlotMachine >> stop!!!");
+
+    buttonTimePoint = currentDuration;
+    state = SlotMachineState.stop;
+    print("buttonTimePoint(currentDuration): $buttonTimePoint");
 
     // 設置是否滾動
     setIsSpin(false);
@@ -253,41 +379,42 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
       // 取得遊戲模式開獎盤面(用於運作程式邏輯)
       lottery = SlotGameConfig.getGameModeLottery(designModeAllLotteryList: designModeAllLotteryList, index: lotteryIndex);
 
-      // 設置盤面內容
-      for (int i = 0; i < barCount; i++) {
-        SlotBar? slotBar = slotMachineBarsBox!.getSlotBar(index: i);
-        if (slotBar != null) {
-          // 設置老虎機滾輪物件內容編號陣列
-          slotBar.setupItemIdList(itemIdList: lottery[i]);
-          // 取得當前Bar有中獎的索引陣列
-          final lotteryIndexList = getLotteryIndexOnBar(lotteryNumbers: lottery, barIndex: i);
-          slotBar.setupItemLotteryIndexList(itemLotteryIndexList: lotteryIndexList);
-
-          // 寫法一
-          // // 將老虎機滾輪物件箱子新增到上方外部錨點上
-          // slotBar.addSlotBarBoxAtTopOutside();
-          // Future.delayed(const Duration(milliseconds: 200), () {
-          //   // 將假的老虎機滾輪物件箱移除
-          //   if (slotBar.fakeSlotBarBox != null) {
-          //     slotBar.fakeSlotBarBox!.removeFromParent();
-          //   }
-          // });
-          // 寫法二，異步滾動 (不建議)
-          Future.delayed(Duration(milliseconds: i * slotBarDelayMilliseconds), () {
-            print("Delay to Stop SlotBar $i !!!");
-            // 將老虎機滾輪物件箱子新增到上方外部錨點上
-            slotBar.addSlotBarBoxAtTopOutside();
-          }).then((value) {
-            // 將假的老虎機滾輪物件箱移除
-            Future.delayed(Duration(milliseconds: (slotBarBoxMoveSpeed * slotBar.targetSlotBarBox!.size.x) ~/ 2), () {
-              // 將假的老虎機滾輪物件箱移除
-              if (slotBar.fakeSlotBarBox != null) {
-                slotBar.fakeSlotBarBox!.removeFromParent();
-              }
-            });
-          });
-        }
-      }
+      // // 設置盤面內容
+      // for (int i = 0; i < barCount; i++) {
+      //   SlotBar? slotBar = slotMachineBarsBox!.getSlotBar(index: i);
+      //   // if (slotBar != null) {
+      //   //   // 設置老虎機滾輪物件內容編號陣列
+      //   //   slotBar.setupItemIdList(itemIdList: lottery[i]);
+      //   //   // 取得當前Bar有中獎的索引陣列
+      //   //   final lotteryIndexList = getLotteryIndexOnBar(lotteryNumbers: lottery, barIndex: i);
+      //   //   slotBar.setupItemLotteryIndexList(itemLotteryIndexList: lotteryIndexList);
+      //   //
+      //   //   // 寫法一
+      //   //   // // 將老虎機滾輪物件箱子新增到上方外部錨點上
+      //   //   // slotBar.addSlotBarBoxAtTopOutside();
+      //   //   // Future.delayed(const Duration(milliseconds: 200), () {
+      //   //   //   // 將假的老虎機滾輪物件箱移除
+      //   //   //   if (slotBar.fakeSlotBarBox != null) {
+      //   //   //     slotBar.fakeSlotBarBox!.removeFromParent();
+      //   //   //   }
+      //   //   // });
+      //   //   // 寫法二，異步滾動 (不建議)
+      //   //   Future.delayed(Duration(milliseconds: i * slotBarDelayMilliseconds), () {
+      //   //     print("Delay to Stop SlotBar $i !!!");
+      //   //     // 將老虎機滾輪物件箱子新增到上方外部錨點上
+      //   //     slotBar.addSlotBarBoxAtTopOutside();
+      //   //   }).then((value) {
+      //   //     // 將假的老虎機滾輪物件箱移除
+      //   //     Future.delayed(Duration(milliseconds: (slotBarBoxMoveSpeed * slotBar.targetSlotBarBox!.size.x) ~/ 2), () {
+      //   //       // 將假的老虎機滾輪物件箱移除
+      //   //       if (slotBar.fakeSlotBarBox != null) {
+      //   //         slotBar.fakeSlotBarBox!.removeFromParent();
+      //   //         slotBar.fakeSlotBarBox = null;
+      //   //       }
+      //   //     });
+      //   //   });
+      //   // }
+      // }
 
       // 更新得分
       win = allLotteryPointList[lotteryIndex];
@@ -335,7 +462,11 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
 
   /// 開始滾動
   void spin() async {
-    // print("SlotMachine >> spin~~~");
+    print("SlotMachine >> spin~~~");
+
+    buttonTimePoint = currentDuration;
+    state = SlotMachineState.spin;
+    print("buttonTimePoint(currentDuration): $buttonTimePoint");
 
     // 設置是否滾動
     // setIsSpin((gameRef.gameBalance > 0));
@@ -353,28 +484,28 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
     _checkGameRound();
 
     // 播放背景音樂
-    _audioPlayBGM();
+    audioPlayBGM();
 
     // 播放滾動音效
     _audioPlaySpin(delayMilliseconds: 0);
 
-    if (slotMachineBarsBox != null) {
-      for (int i = 0; i < barCount; i++) {
-        SlotBar? slotBar = slotMachineBarsBox!.getSlotBar(index: i);
-        if (slotBar != null) {
-          // 寫法一，同步滾動
-          // slotBar.spin();
-          // 寫法二，異步滾動 (不建議)
-          Future.delayed(Duration(milliseconds: i * slotBarDelayMilliseconds), () {
-            print("Delay to Spin SlotBar $i !!!");
-            slotBar.spin();
-          }).then((value) {
-            // 設置假的老虎機滾輪物件箱
-            slotBar.addFakeSlotBarBox();
-          });
-        }
-      }
-    }
+    // if (slotMachineBarsBox != null) {
+    //   for (int i = 0; i < barCount; i++) {
+    //     SlotBar? slotBar = slotMachineBarsBox!.getSlotBar(index: i);
+    //     if (slotBar != null) {
+    //       // 寫法一，同步滾動
+    //       // slotBar.spin();
+    //       // 寫法二，異步滾動 (不建議)
+    //       Future.delayed(Duration(milliseconds: i * slotBarDelayMilliseconds), () {
+    //         print("Delay to Spin SlotBar $i !!!");
+    //         slotBar.spin();
+    //       }).then((value) {
+    //         // 設置假的老虎機滾輪物件箱
+    //         slotBar.addFakeSlotBarBox();
+    //       });
+    //     }
+    //   }
+    // }
 
     // 更新得分
     win = 0;
@@ -394,12 +525,12 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
     // 進行餘額動畫
     gameRef.slotGameControlMenu.showBalance(balance: gameRef.gameBalance);
 
-    // 指定時間後停止
-    int delayStopMilliseconds = (barCount * slotBarDelayMilliseconds) * 2;
-    Future.delayed(Duration(milliseconds: delayStopMilliseconds), () {
-      print("Delay to Stop!!!");
-      stop();
-    });
+    // // 指定時間後停止
+    // int delayStopMilliseconds = (barCount * slotBarDelayMilliseconds) * 2;
+    // Future.delayed(Duration(milliseconds: delayStopMilliseconds), () {
+    //   print("Delay to Stop!!!");
+    //   stop();
+    // });
   }
 
   /// 設置是否滾動

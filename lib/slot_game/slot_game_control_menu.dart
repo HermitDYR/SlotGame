@@ -154,10 +154,12 @@ class SlotGameControlMenu extends PositionComponent with HasGameRef<SlotGame> {
 
   /// 老虎機滾動按鈕點擊事件
   _onTapSpinButton(bool isSpin) {
-    // print("_onTapSpinButton");
-    if (gameRef.slotMachine.isSpin) {
+    print("_onTapSpinButton isSpin: $isSpin");
+    if (!isSpin) {
+      // 如果按鈕正在Spin狀態則老虎機停止
       gameRef.slotMachine.stop();
     } else {
+      // 如果按鈕正在Stop狀態則老虎機轉動
       gameRef.slotMachine.spin();
     }
   }

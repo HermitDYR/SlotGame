@@ -129,7 +129,10 @@ class SlotBar extends PositionComponent with HasGameRef<SlotGame> {
   /// 將老虎機滾輪物件箱子新增到上方外部錨點上
   void addSlotBarBoxAtTopOutside() {
     // print("addSlotBarBoxAtTopOutside~~~ slotBarBoxAddedCount: $slotBarBoxAddedCount");
-    targetSlotBarBox = null;
+    if (targetSlotBarBox != null) {
+      return;
+    }
+
     targetSlotBarBox = SlotBarBox(
       index: index,
       itemCount: itemCount,
@@ -142,6 +145,7 @@ class SlotBar extends PositionComponent with HasGameRef<SlotGame> {
       onStay: onStayFromSlotBarBox,
       itemIdList: _itemIdList,
       itemLotteryIndexList: _itemLotteryIndexList,
+      onRemovePosition: _onRemovePosition,
       // onCollisionWithBottomReplyBox: _onCollisionWithBottomReplyBoxFromSlotBarBox,
     );
     add(targetSlotBarBox!);
@@ -167,6 +171,7 @@ class SlotBar extends PositionComponent with HasGameRef<SlotGame> {
       onStay: onStayFromSlotBarBox,
       itemIdList: lottery[index],
       itemLotteryIndexList: _itemLotteryIndexList,
+      onRemovePosition: _onRemovePosition,
       // onCollisionWithBottomReplyBox: _onCollisionWithBottomReplyBoxFromSlotBarBox,
     );
     add(targetSlotBarBox!);
@@ -181,11 +186,20 @@ class SlotBar extends PositionComponent with HasGameRef<SlotGame> {
   //   // addSlotBarBoxAtTopOutside();
   // }
 
+  ///
+  void _onRemovePosition(int index) {
+    if (targetSlotBarBox != null) {
+      targetSlotBarBox = null;
+    }
+  }
+
   /// 開始滾動
   void spin() {
+    // print("SlotBar $index is spin!!!");
     // TODO: 如果SlotBarBox向下更新速度過快，可能會導致與SlotBarBottomReplayBox的碰撞事件失效
     // - 解法，當SlotBarBox向下更新速度越快，則SlotBarBottomReplayBox須往Y軸下方多偏移一些位置，讓碰撞監聽正常
     if (targetSlotBarBox != null && targetSlotBarBox!.isStay) {
+      print("SlotBar $index is spin!!! Do!!!");
       targetSlotBarBox!.isStay = false;
       // targetSlotBarBox!.isCollisionWithBottomReplyBox = false;
       targetSlotBarBox!.isMove = true;
@@ -226,9 +240,9 @@ class SlotBar extends PositionComponent with HasGameRef<SlotGame> {
 
   /// 設置假的老虎機滾輪物件箱
   void addFakeSlotBarBox() {
-    print("SlotBar >> addFakeSlotBarBox~~~");
-    if (fakeSlotBarBoxSpriteAnimation != null) {
-
+    // print("SlotBar >> addFakeSlotBarBox~~~");
+    if (fakeSlotBarBoxSpriteAnimation != null && fakeSlotBarBox == null) {
+      print("SlotBar >> addFakeSlotBarBox~~~ Do!!!");
       // TODO: https://stackoverflow.com/questions/71183657/why-spriteanimation-oncomplete-do-not-trigger-after-restarting-the-game-in-flutt
       fakeSlotBarBoxSpriteAnimation!.reset();
 
