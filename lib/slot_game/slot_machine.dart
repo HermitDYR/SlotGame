@@ -21,19 +21,32 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
 
   SlotMachineState state = SlotMachineState.idle;
 
+  /// 老虎機目前的時間計數
   double currentDuration = 0.0;
 
+  /// 老虎機的按鈕按下時間點
   double buttonTimePoint = 0.0;
 
+  /// 老虎機各Bar的滾動延遲秒數
   double slotBarSpinDelay = 0.2;
 
+  /// 老虎機各Bar的假滾動Box新增延遲秒數
   double fakeSlotBarBoxAddDelay = 0.2;
 
+  /// 老虎機各Bar的停止延遲秒數
   double slotBarStopDelay = 0.2;
 
+  /// 老虎機各Bar的假滾動Box移除延遲秒數
   double fakeSlotBarBoxRemoveDelay = 0.2;
 
+  /// 老虎機各Bar的停止間隔時間點
   double nextStopTimePoint = 1.0;
+
+  /// 是否自動停止
+  bool isAutoStop = true;
+
+  /// 老虎機各Bar的自動停止延遲秒數
+  double slotBarAutoStopDelay = 3.0;
 
   /// 符合RTP中獎機率的設計模式開獎盤面列表(包含中獎、未中獎)
   List<List<List<int>>> designModeAllLotteryList = [];
@@ -171,6 +184,12 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
 
     if (state == SlotMachineState.spin) {
       _checkSlotBarToSpin(currentDuration);
+
+      if (isAutoStop) {
+        if (currentDuration > buttonTimePoint + slotBarAutoStopDelay) {
+          stop();
+        }
+      }
     }
 
     if (state == SlotMachineState.stop) {
@@ -214,9 +233,9 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
   void _checkSlotBarToStop(double time) {
     // print("_checkSlotBarToStop currentDuration: $currentDuration, buttonTimePoint: $buttonTimePoint");
     // 設置盤面內容
-    var list = [];
+    var timeList = [];
     for (int i = 0; i < barCount; i++) {
-      list.add(buttonTimePoint + (i * slotBarStopDelay) + nextStopTimePoint);
+      timeList.add(buttonTimePoint + (i * slotBarStopDelay) + nextStopTimePoint);
       SlotBar? slotBar = slotMachineBarsBox!.getSlotBar(index: i);
       if (slotBar != null) {
         // 設置老虎機滾輪物件內容編號陣列
@@ -225,13 +244,13 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
         final lotteryIndexList = getLotteryIndexOnBar(lotteryNumbers: lottery, barIndex: i);
         slotBar.setupItemLotteryIndexList(itemLotteryIndexList: lotteryIndexList);
 
-        if (time > list[i] && time < (slotBarStopDelay + list[i])) {
+        if (time > timeList[i] && time < (slotBarStopDelay + timeList[i])) {
           // print("SlotBar $i to Stop Do!!!");
           // 將老虎機滾輪物件箱子新增到上方外部錨點上
           slotBar.addSlotBarBoxAtTopOutside();
         }
 
-        if (time > list[i] + fakeSlotBarBoxRemoveDelay && time < (slotBarStopDelay + list[i] + fakeSlotBarBoxRemoveDelay)) {
+        if (time > timeList[i] + fakeSlotBarBoxRemoveDelay && time < (slotBarStopDelay + timeList[i] + fakeSlotBarBoxRemoveDelay)) {
           // print("SlotBar $i to Stop Do Delay!!!");
           // 將假的老虎機滾輪物件箱移除
           if (slotBar.fakeSlotBarBox != null) {
@@ -355,6 +374,9 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
 
   /// 停止滾動
   void stop() async {
+    if (state == SlotMachineState.stop) {
+      return;
+    }
     print("SlotMachine >> stop!!!");
 
     buttonTimePoint = currentDuration;
