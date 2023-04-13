@@ -4,7 +4,10 @@ import 'package:flame/events.dart';
 
 class SlotGameBgmButton extends SpriteComponent with Tappable {
   /// 是否開啟
-  bool isOpen = true;
+  bool _isOpen = true;
+
+  /// 是否開啟 (唯讀取)
+  bool get isOpen => _isOpen;
 
   /// 點擊
   Function(bool)? onTap;
@@ -27,13 +30,7 @@ class SlotGameBgmButton extends SpriteComponent with Tappable {
   @override
   bool onTapUp(TapUpInfo info) {
     // 更新開關
-    isOpen = !isOpen;
-
-    // 設置精靈
-    sprite = (isOpen) ? spriteNormal : spriteDisabled;
-
-    // 點擊回彈
-    effectClickBounce();
+    setIsOpen(!isOpen);
 
     // 對外通知
     if (onTap != null) {
@@ -41,6 +38,17 @@ class SlotGameBgmButton extends SpriteComponent with Tappable {
     }
 
     return true;
+  }
+
+  /// 設置是否開啟
+  void setIsOpen(bool isOpen) {
+    _isOpen = isOpen;
+
+    // 設置精靈
+    sprite = (isOpen) ? spriteNormal : spriteDisabled;
+
+    // 點擊回彈
+    effectClickBounce();
   }
 
   /// 點擊回彈

@@ -295,22 +295,6 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
     return;
   }
 
-  /// 播放背景音樂
-  void audioPlayBGM() {
-    if (gameRef.bgmAudioPlayer == null) return;
-    if (gameRef.bgmAudioPlayer!.state == PlayerState.completed || gameRef.bgmAudioPlayer!.state == PlayerState.stopped || gameRef.bgmAudioPlayer!.state == PlayerState.paused) {
-      gameRef.bgmAudioPlayer!.play(AssetSource('audio/bgm.mp3'));
-    }
-  }
-
-  /// 暫停背景音樂
-  void audioPauseBGM() {
-    if (gameRef.bgmAudioPlayer == null) return;
-    if (gameRef.bgmAudioPlayer!.state == PlayerState.playing) {
-      gameRef.bgmAudioPlayer!.pause();
-    }
-  }
-
   /// 播放停止音效
   void _audioPlayStop({required int delayMilliseconds}) {
     if (_stopPlayer == null) return;
@@ -509,7 +493,7 @@ class SlotMachine extends PositionComponent with Tappable, HasGameRef<SlotGame> 
     _checkGameRound();
 
     // 播放背景音樂
-    audioPlayBGM();
+    gameRef.audioPlayBGM();
 
     // 播放滾動音效
     _audioPlaySpin(delayMilliseconds: 0);

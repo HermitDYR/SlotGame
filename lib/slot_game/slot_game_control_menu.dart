@@ -146,13 +146,9 @@ class SlotGameControlMenu extends PositionComponent with HasGameRef<SlotGame> {
     print("_onTapBgmButton: $isOpen");
     if (gameRef.bgmAudioPlayer == null) return;
     if (isOpen) {
-      if (gameRef.bgmAudioPlayer!.state == PlayerState.playing) {
-        gameRef.bgmAudioPlayer!.pause();
-      }
+      gameRef.audioPlayBGM();
     } else {
-      if (gameRef.bgmAudioPlayer!.state == PlayerState.completed || gameRef.bgmAudioPlayer!.state == PlayerState.stopped || gameRef.bgmAudioPlayer!.state == PlayerState.paused) {
-        gameRef.bgmAudioPlayer!.play(AssetSource('audio/bgm.mp3'));
-      }
+      gameRef.audioPauseBGM();
     }
   }
 

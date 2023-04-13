@@ -80,7 +80,7 @@ class SlotGame extends FlameGame with HasTappables, HasCollisionDetection {
       print('Window lost focus... paused: $paused');
       if (slotMachine != null) {
         // 暫停背景音樂
-        slotMachine!.audioPauseBGM();
+        audioPauseBGM();
       }
     });
 
@@ -89,9 +89,15 @@ class SlotGame extends FlameGame with HasTappables, HasCollisionDetection {
       print('Window regained focus... paused: $paused');
       if (slotMachine != null) {
         // 播放背景音樂
-        slotMachine!.audioPlayBGM();
+        audioPlayBGM();
       }
     });
+  }
+
+  @override
+  void update(double dt) {
+    // TODO: implement update
+    super.update(dt);
   }
 
   /// 設置遊戲(依據Web網址參數)
@@ -232,5 +238,27 @@ class SlotGame extends FlameGame with HasTappables, HasCollisionDetection {
       anchor: Anchor.center,
     ));
     return;
+  }
+
+  /// 播放背景音樂
+  void audioPlayBGM() {
+    if (bgmAudioPlayer == null) return;
+    if (bgmAudioPlayer!.state == PlayerState.completed || bgmAudioPlayer!.state == PlayerState.stopped || bgmAudioPlayer!.state == PlayerState.paused) {
+      bgmAudioPlayer!.play(AssetSource('audio/bgm.mp3'));
+      if (slotGameControlMenu.slotGameBgmButton != null) {
+        slotGameControlMenu.slotGameBgmButton!.setIsOpen(true);
+      }
+    }
+  }
+
+  /// 暫停背景音樂
+  void audioPauseBGM() {
+    if (bgmAudioPlayer == null) return;
+    if (bgmAudioPlayer!.state == PlayerState.playing) {
+      bgmAudioPlayer!.pause();
+      if (slotGameControlMenu.slotGameBgmButton != null) {
+        slotGameControlMenu.slotGameBgmButton!.setIsOpen(false);
+      }
+    }
   }
 }
